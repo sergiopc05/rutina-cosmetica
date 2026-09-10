@@ -200,15 +200,29 @@ curl -X POST "https://TU-REF.supabase.co/functions/v1/dispatch-notifications" \
 
 ## 5. Desplegar la PWA
 
-Cualquier hosting estático sirve (Cloudflare Pages, Vercel, Netlify):
+### Opción A — GitHub Pages (workflow ya incluido)
 
-```bash
-npm run build      # genera dist/
-```
+`.github/workflows/deploy-pages.yml` publica en cada push a `master`. Una sola vez:
 
-- Build command: `npm run build` · Output: `dist`
-- Variables de entorno: las mismas `VITE_*` del `.env.local`.
-- Añade el dominio a las *Redirect URLs* de Supabase (paso 3.3).
+1. **Settings → Pages → Source: "GitHub Actions"**.
+2. **Settings → Secrets and variables → Actions** → añade:
+   `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_VAPID_PUBLIC_KEY`.
+3. En Supabase → *Authentication → URL Configuration* → *Redirect URLs*:
+   `https://TU-USUARIO.github.io/rutina-cosmetica/`
+4. Haz push (o *Actions → deploy-pages → Run workflow*).
+
+Queda en `https://TU-USUARIO.github.io/rutina-cosmetica/`. El workflow compila con
+`VITE_BASE=/rutina-cosmetica/`; en local no cambia nada (raíz).
+
+> GitHub Pages con repo **privado** requiere plan de pago. Si el repo es privado y
+> estás en el plan gratis: hazlo público (la `anon key` ya va en el bundle igualmente,
+> los datos los protege el RLS) o usa la opción B.
+
+### Opción B — Cloudflare Pages / Vercel / Netlify
+
+Conecta el repo. Build command `npm run build`, output `dist`, sin `VITE_BASE`
+(se sirve en la raíz). Añade las `VITE_*` como variables y la URL a *Redirect URLs*
+de Supabase.
 
 **Instalar en el iPhone**: abre la web en Safari → Compartir → *Añadir a pantalla de
 inicio* → abre la app desde el icono → Ajustes → activar avisos.

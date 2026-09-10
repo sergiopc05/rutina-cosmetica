@@ -7,18 +7,22 @@ import { ProductsPage } from '@/features/products/ProductsPage'
 import { ProductDetailPage } from '@/features/products/ProductDetailPage'
 import { SettingsPage } from '@/features/settings/SettingsPage'
 
-export const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <RootLayout />,
-    children: [
-      { index: true, element: <TodayPage /> },
-      { path: 'rutina', element: <RoutinePage /> },
-      { path: 'mes', element: <CalendarPage /> },
-      { path: 'cremas', element: <ProductsPage /> },
-      { path: 'cremas/:id', element: <ProductDetailPage /> },
-      { path: 'ajustes', element: <SettingsPage /> },
-      { path: '*', element: <TodayPage /> },
-    ],
-  },
-])
+export const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      element: <RootLayout />,
+      children: [
+        { index: true, element: <TodayPage /> },
+        { path: 'rutina', element: <RoutinePage /> },
+        { path: 'mes', element: <CalendarPage /> },
+        { path: 'cremas', element: <ProductsPage /> },
+        { path: 'cremas/:id', element: <ProductDetailPage /> },
+        { path: 'ajustes', element: <SettingsPage /> },
+        { path: '*', element: <TodayPage /> },
+      ],
+    },
+  ],
+  // Soporta servir la app en un subpath (GitHub Pages: /rutina-cosmetica/).
+  { basename: import.meta.env.BASE_URL.replace(/\/+$/, '') || '/' },
+)

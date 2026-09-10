@@ -17,6 +17,10 @@ self.skipWaiting()
 cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)
 
+// Base de la app (raíz o subpath tipo GitHub Pages). scope termina en "/".
+const BASE = self.registration.scope
+const at = (path: string) => new URL(path, BASE).href
+
 // Fotos de producto (Open Beauty Facts + Storage firmado): cache-first.
 registerRoute(
   ({ url }) =>
@@ -55,9 +59,9 @@ self.addEventListener('push', (event: PushEvent) => {
     self.registration.showNotification(title, {
       body: payload.body ?? 'Toca para ver tu rutina de ahora.',
       tag: payload.tag ?? 'rutina',
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-monochrome-96.png',
-      data: { url: payload.url ?? '/' },
+      icon: at('icons/icon-192.png'),
+      badge: at('icons/icon-monochrome-96.png'),
+      data: { url: payload.url ? at(payload.url.replace(/^\//, '')) : BASE },
       requireInteraction: false,
     }),
   )
@@ -65,7 +69,8 @@ self.addEventListener('push', (event: PushEvent) => {
 
 self.addEventListener('notificationclick', (event: NotificationEvent) => {
   event.notification.close()
-  const target = (event.notification.data?.url as string | undefined) ?? '/'
+  const target =
+    (event.notification.data?.url as string | undefined) ?? BASE
   event.waitUntil(
     (async () => {
       const clientsArr = await self.clients.matchAll({
