@@ -1,0 +1,30 @@
+# Mantiene "despierto" el proyecto Supabase del plan gratuito, que se pausa tras
+# ~7 días sin actividad. Hace una petición cada 3 días.
+#
+# Configura dos secretos del repo (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_URL       = https://TU-REF.supabase.co
+#   SUPABASE_ANON_KEY  = tu clave anon public
+#
+# Nota: si tienes las notificaciones activadas, el cron interno (cada minuto)
+# probablemente ya lo mantiene activo; esto es un seguro extra.
+
+name: keep-supabase-awake
+
+on:
+  schedule:
+    - cron: '23 7 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping REST y Auth
+        run: |
+          set -e
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/profiles?select=id&limit=1")
+          echo "REST -> $code"
+          [ "$code" = "200" ] || [ "$code" = "206" ] || exit 1
+          curl -sf "${{ secrets.SUPABASE_URL }}/auth/v1/health" >/dev/null && echo "Auth -> OK"
