@@ -83,7 +83,14 @@ El enlace mágico usa la plantilla **Magic Link** (activada por defecto).
 > enlace (la app ya lo pide). Para que el correo incluya ese código, edita la
 > plantilla en Supabase:
 >
-> **Authentication → Emails → Templates → Magic Link** → reemplaza el HTML por:
+> ⚠️ **Edita DOS plantillas, no solo una.** `signInWithOtp` no siempre usa "Magic
+> Link": si el correo es **nuevo** (nunca inició sesión), Supabase manda la
+> plantilla **"Confirm signup"**; solo a partir de la segunda vez usa **"Magic
+> Link"**. Si solo editas una, la primera vez (o la otra) te seguirá llegando el
+> correo sin código — es la causa más habitual de "el email no manda el código".
+>
+> **Authentication → Emails → Templates** → edita **las dos**, "Confirm signup" y
+> "Magic Link", con el mismo HTML:
 > ```html
 > <h2>Tu código de acceso</h2>
 > <p style="font-size:32px;letter-spacing:6px;font-weight:bold">{{ .Token }}</p>
@@ -91,7 +98,9 @@ El enlace mágico usa la plantilla **Magic Link** (activada por defecto).
 > <p>¿Estás en el navegador (no en la app instalada)? Puedes usar este enlace en su lugar:
 >    <a href="{{ .ConfirmationURL }}">Entrar</a></p>
 > ```
-> Guarda. Desde ese momento el correo trae el código que pide el login.
+> Guarda **las dos** por separado. Ojo: tiene que ser exactamente `{{ .Token }}`
+> (con el punto y el espacio); si lo escribes distinto, Supabase no lo sustituye
+> y llega literalmente el texto `{{ .Token }}` o queda vacío.
 
 > **Problemas de correo** (`email rate limit exceeded`, `Error sending confirmation
 > email`): el servicio integrado de Supabase solo permite ~2 emails/hora y a veces
