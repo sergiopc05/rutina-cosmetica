@@ -54,9 +54,11 @@ export function LoginPage() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-6 py-10">
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-100 text-3xl dark:bg-brand-900/40">
-          🧴
-        </div>
+        <img
+          src={`${import.meta.env.BASE_URL}icons/icon-192.png`}
+          alt=""
+          className="mx-auto mb-3 h-16 w-16 rounded-2xl object-cover shadow-sm"
+        />
         <h1 className="text-2xl font-bold tracking-tight">{env.appName}</h1>
         <p className="mt-1 text-sm text-black/55 dark:text-white/55">
           Tus rutinas de tratamientos, sincronizadas y con avisos a la hora.
