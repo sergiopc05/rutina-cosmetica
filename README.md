@@ -76,6 +76,23 @@ https://TU-DOMINIO-DE-PRODUCCION
 
 El enlace mágico usa la plantilla **Magic Link** (activada por defecto).
 
+> **Imprescindible para el iPhone instalado**: una PWA añadida a la pantalla de
+> inicio de iOS tiene su propio almacenamiento, **separado de Safari**. Si tocas el
+> enlace del email, se abre en Safari y la sesión queda ahí — la app instalada
+> sigue sin sesión. La solución es entrar con el **código de 6 dígitos** en vez del
+> enlace (la app ya lo pide). Para que el correo incluya ese código, edita la
+> plantilla en Supabase:
+>
+> **Authentication → Emails → Templates → Magic Link** → reemplaza el HTML por:
+> ```html
+> <h2>Tu código de acceso</h2>
+> <p style="font-size:32px;letter-spacing:6px;font-weight:bold">{{ .Token }}</p>
+> <p>Escríbelo en la app. Válido unos minutos.</p>
+> <p>¿Estás en el navegador (no en la app instalada)? Puedes usar este enlace en su lugar:
+>    <a href="{{ .ConfirmationURL }}">Entrar</a></p>
+> ```
+> Guarda. Desde ese momento el correo trae el código que pide el login.
+
 > **Problemas de correo** (`email rate limit exceeded`, `Error sending confirmation
 > email`): el servicio integrado de Supabase solo permite ~2 emails/hora y a veces
 > falla. Configura **SMTP propio** en *Authentication → Emails → SMTP Settings* y

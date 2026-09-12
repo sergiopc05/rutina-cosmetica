@@ -14,6 +14,8 @@ interface AuthContextValue {
   user: User | null
   loading: boolean
   signInWithEmail: (email: string) => Promise<{ error: string | null }>
+  /** Alternativa al enlace: valida el código de 6 dígitos del email sin salir de la app. */
+  verifyEmailCode: (email: string, token: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
 
@@ -56,6 +58,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: {
           emailRedirectTo: window.location.origin + import.meta.env.BASE_URL,
         },
+      })
+      return { error: error?.message ?? null }
+    },
+    async verifyEmailCode(email: string, token: string) {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: token.trim(),
+        type: 'email',
       })
       return { error: error?.message ?? null }
     },

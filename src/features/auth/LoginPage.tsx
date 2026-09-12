@@ -4,11 +4,15 @@ import { Button, Spinner, TextInput } from '@/components/ui'
 import { useAuth } from '@/app/AuthProvider'
 
 export function LoginPage() {
-  const { signInWithEmail } = useAuth()
+  const { signInWithEmail, verifyEmailCode } = useAuth()
   const [email, setEmail] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
   const [cooldown, setCooldown] = useState(0)
+
+  const [code, setCode] = useState('')
+  const [verifying, setVerifying] = useState(false)
+  const [codeError, setCodeError] = useState<string | null>(null)
 
   useEffect(() => {
     if (cooldown <= 0) return
@@ -37,6 +41,16 @@ export function LoginPage() {
     }
   }
 
+  async function onVerifyCode(e: FormEvent) {
+    e.preventDefault()
+    setVerifying(true)
+    setCodeError(null)
+    const { error } = await verifyEmailCode(email.trim(), code)
+    setVerifying(false)
+    if (error) setCodeError('Código incorrecto o caducado. Pide uno nuevo.')
+    // Si no hay error, la sesión se activa sola (onAuthStateChange) y se sale del login.
+  }
+
   return (
     <div className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-6 py-10">
       <div className="mb-8 text-center">
@@ -50,14 +64,41 @@ export function LoginPage() {
       </div>
 
       {state === 'sent' ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
-          <p className="font-semibold">Revisa tu correo</p>
-          <p className="mt-1">
-            Te hemos enviado un enlace de acceso a <strong>{email}</strong>. Ábrelo
-            en este mismo dispositivo.
-          </p>
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
+            <p className="font-semibold">Revisa tu correo</p>
+            <p className="mt-1">
+              Te hemos enviado un enlace y un código a <strong>{email}</strong>.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100">
+            <p className="font-semibold">¿Instalaste la app en el iPhone?</p>
+            <p className="mt-1">
+              No toques el enlace del correo: se abre en Safari, no dentro de la
+              app instalada, y no podrás entrar. Usa el <strong>código de 6
+              dígitos</strong> de abajo.
+            </p>
+          </div>
+
+          <form onSubmit={onVerifyCode} className="space-y-2">
+            <TextInput
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              placeholder="Código de 6 dígitos"
+              maxLength={8}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              required
+            />
+            <Button type="submit" className="w-full" disabled={verifying || !code}>
+              {verifying ? <Spinner /> : 'Confirmar código'}
+            </Button>
+            {codeError && <p className="text-sm text-red-600">{codeError}</p>}
+          </form>
+
           <button
-            className="mt-3 text-xs underline disabled:opacity-50"
+            className="w-full text-center text-xs underline disabled:opacity-50"
             onClick={() => setState('idle')}
             disabled={cooldown > 0}
           >
@@ -90,7 +131,7 @@ export function LoginPage() {
           </Button>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <p className="text-center text-xs text-black/45 dark:text-white/45">
-            Sin contraseña: te enviamos un enlace mágico por email.
+            Sin contraseña: te enviamos un enlace y un código por email.
           </p>
         </form>
       )}
